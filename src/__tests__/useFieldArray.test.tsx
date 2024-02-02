@@ -3209,7 +3209,7 @@ describe('useFieldArray', () => {
       expect(screen.queryByAltText('Max length should be 2')).toBeNull();
     });
 
-    it('should respect the validation mode and trigger validation after each field array action', async () => {
+    it('should respect onChange validation mode and trigger validation after each field array action', async () => {
       const App = () => {
         const {
           control,
@@ -3275,6 +3275,91 @@ describe('useFieldArray', () => {
       });
 
       expect(screen.queryByAltText('Max length should be 2')).toBeNull();
+    });
+
+    it('should respect onBlur validation mode and not trigger validation after any field array action', async () => {
+      const App = () => {
+        const {
+          control,
+          handleSubmit,
+          formState: { errors, isSubmitted },
+        } = useForm({
+          defaultValues: {
+            test: [
+              { test: 'long' },
+              { test: 'long' },
+              { test: 'long' },
+              { test: 'long' },
+            ],
+          },
+          mode: 'onBlur',
+        });
+
+        const { remove, append } = useFieldArray({
+          control,
+          name: 'test',
+          rules: {
+            maxLength: {
+              value: 2,
+              message: 'Max length should be 2',
+            },
+          },
+        });
+
+        return (
+          <form onSubmit={handleSubmit(() => {})}>
+            <p>{errors.test?.root?.message}</p>
+            <button>submit</button>
+            <button
+              type={'button'}
+              onClick={() => {
+                remove();
+              }}
+            >
+              remove
+            </button>
+
+            <button
+              type={'button'}
+              onClick={() => {
+                append({
+                  test: '',
+                });
+              }}
+            >
+              append
+            </button>
+
+            <div>isSubmitted {String(isSubmitted)}</div>
+          </form>
+        );
+      };
+
+      render(<App />);
+
+      expect(screen.queryByAltText('Max length should be 2')).toBeNull();
+
+      await actComponent(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'append' }));
+      });
+
+      expect(screen.queryByAltText('Max length should be 2')).toBeNull();
+
+      await actComponent(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'remove' }));
+      });
+
+      expect(screen.queryByAltText('Max length should be 2')).toBeNull();
+
+      await actComponent(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'submit' }));
+      });
+
+      screen.getByText('isSubmitted true');
+
+      console.log('it is clearly submitted now');
+
+      screen.getByText('Max length should be 2');
     });
 
     it('should not conflict with field level error', async () => {

@@ -5,6 +5,7 @@ import generateId from './logic/generateId';
 import getFocusFieldName from './logic/getFocusFieldName';
 import getValidationModes from './logic/getValidationModes';
 import isWatched from './logic/isWatched';
+import skipValidation from './logic/skipValidation';
 import updateFieldArrayRootError from './logic/updateFieldArrayRootError';
 import validateField from './logic/validateField';
 import appendAt from './utils/append';
@@ -315,11 +316,26 @@ export function useFieldArray<
         ...control._formState,
       } as FormState<TFieldValues>);
 
-    if (
-      _actioned.current &&
-      (!getValidationModes(control._options.mode).isOnSubmit ||
-        control._formState.isSubmitted)
-    ) {
+    const validationModeBeforeSubmit = getValidationModes(
+      control._options.mode,
+    );
+    const validationModeAfterSubmit = getValidationModes(
+      control._options.reValidateMode,
+    );
+    console.log(
+      'now im checking if it is submitted',
+      control._formState.isSubmitted,
+    );
+    const shouldSkipValidation = skipValidation(
+      false,
+      get(control._formState.touchedFields, name),
+      get(control._formState.isSubmitted),
+      validationModeAfterSubmit,
+      validationModeBeforeSubmit,
+    );
+    console.log('shouldSkipValidation', shouldSkipValidation);
+
+    if (_actioned.current && !shouldSkipValidation) {
       if (control._options.resolver) {
         control._executeSchema([name]).then((result) => {
           const error = get(result.errors, name);

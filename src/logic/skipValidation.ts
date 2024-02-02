@@ -14,6 +14,13 @@ export default (
     isOnAll: boolean;
   }>,
 ) => {
+  console.log('skipValidation', {
+    isBlurEvent,
+    isTouched,
+    isSubmitted,
+    reValidateMode,
+    mode,
+  });
   if (mode.isOnAll) {
     return false;
   } else if (!isSubmitted && mode.isOnTouch) {

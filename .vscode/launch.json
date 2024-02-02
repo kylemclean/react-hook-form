@@ -8,8 +8,17 @@
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true,
       "cwd": "${workspaceFolder}",
-      "runtimeExecutable": "yarn",
-      "args": ["test", "--runInBand", "--watchAll=false"]
+      "runtimeExecutable": "/home/kyle/.nvm/versions/node/v19.2.0/bin/pnpm",
+      "args": [
+        "test",
+        "--",
+        "--runInBand",
+        "--watchAll=false",
+        "-t",
+        "should respect onBlur validation mode and not trigger validation after any field array action",
+        "--testPathPattern",
+        "useFieldArray.test.tsx"
+      ]
     }
   ]
 }
